@@ -8,16 +8,15 @@ const bodyParser = require("body-parser");
 
 app.use(bodyParser.json());
 
-function writeFile(res, key, contents) {
-  fs.writeFile(path.join("data", key), contents, () => {
-    const obj = { success: true, key };
-    res.end(JSON.stringify(obj));
-  });
+function writeFile(key, contents) {
+  fs.writeFileSync(path.join("data", key), contents);
+  const result = { success: true, key };
+  return result;
 }
-function readFile(res, key) {
+function readFile(key) {
   let data = fs.readFileSync(path.join("data", key), "utf-8");
-  const obj = { key, data };
-  res.end(JSON.stringify(obj));
+  const result = { key, data };
+  return result;
 }
 
 app.use("/api", function(req, res, next) {
@@ -26,16 +25,10 @@ app.use("/api", function(req, res, next) {
   next();
 });
 
-app.use("/api/load", function(req, res) {
-  const dirs = fs.readdirSync("./data");
-  if (dirs.indexOf(req.body.key) >= 0) {
-    readFile(res, req.body.key);
-  }
-});
-
 function listFiles() {
   const dirs = fs.readdirSync("./data");
   let fileobjs = [];
+  //更新日を収集
   dirs.forEach(element => {
     var stats = fs.statSync(path.join("data", element));
     fileobjs.push({
@@ -46,27 +39,41 @@ function listFiles() {
   return fileobjs;
 }
 
+function getId(url) {
+  return url.slice(1);
+}
+
+function checkExist(id) {
+  const dirs = fs.readdirSync("./data");
+  return dirs.indexOf(id) >= 0;
+}
+
 app.use("/api/files", function(req, res) {
+  let result = {
+    success: false
+  };
+
   if (req.url === "/") {
-    res.end(JSON.stringify(listFiles()));
+    result = listFiles();
   } else {
-    const id = req.url.slice(1);
-    const dirs = fs.readdirSync("./data");
-    const isExist = dirs.indexOf(id) >= 0;
+    const id = getId(req.url);
+    const isExist = checkExist(id);
+
     if (req.method === "POST") {
       if (isExist) {
-        writeFile(res, id, req.body.contents);
+        result = writeFile(id, req.body.contents);
       } else {
         const random = generateRandomId();
-        writeFile(res, random, req.body.contents);
+        result = writeFile(random, req.body.contents);
       }
     }
     if (req.method === "GET") {
       if (isExist) {
-        readFile(res, id);
+        result = readFile(id);
       }
     }
   }
+  res.end(JSON.stringify(result));
 });
 
 function generateRandomId() {
