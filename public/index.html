@@ -10,7 +10,11 @@
   <body>
     <div id="app">
       <div class="files">
-        <div class="files__items" v-for="file in files">
+        <div
+          class="files__items"
+          v-for="file in files"
+          @click="select(file.name)"
+        >
           {{ file.name }} {{ file.mtime }}
         </div>
       </div>

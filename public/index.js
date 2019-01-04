@@ -7,29 +7,39 @@ async function save(key, contents) {
   const obj = { key, contents };
   const method = "POST";
   const body = JSON.stringify(obj);
-  const res = await fetch("/api", { method, headers, body });
-  const json = await res.json();
-  console.log(json);
+  const res = await fetch(`/api/files/${key}`, { method, headers, body });
+  return await res.json();
+}
+
+async function read(key) {
+  const res = await fetch(`/api/files/${key}`);
+  return await res.json();
 }
 
 async function get() {
-  const res = await fetch("/files");
-  const json = await res.json();
-  return json;
+  const res = await fetch("/api/files");
+  return await res.json();
 }
 
 new Vue({
   el: "#app",
   data: {
     input: "#test",
-    key: "test",
+    key: "",
     files: []
   },
   methods: {
-    save() {
-      save(this.key, this.input);
+    async save() {
+      const res = await save(this.key, this.input);
+      if (res.success) {
+        this.key = res.key;
+      }
     },
-    load() {}
+    load() {},
+    async select(filename) {
+      this.key = filename;
+      this.input = (await read(filename)).data;
+    }
   },
   async mounted() {
     this.files = await get();
