@@ -10,7 +10,9 @@
   <body>
     <div id="app">
       <div class="files">
-        <div class="files__items" v-for="file in files">{{ file }}</div>
+        <div class="files__items" v-for="file in files">
+          {{ file.name }} {{ file.mtime }}
+        </div>
       </div>
       <div class="contents">
         <div><textarea v-model="input"></textarea></div>

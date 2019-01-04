@@ -17,7 +17,16 @@ app.use("/api", function(req, res) {
 
 app.use("/files", function(req, res) {
   const dirs = fs.readdirSync("./data");
-  res.end(JSON.stringify(dirs));
+  let fileobjs = [];
+  dirs.forEach(element => {
+    var stats = fs.statSync(path.join("data", element));
+    fileobjs.push({
+      name: element,
+      mtime: stats.mtime.getTime()
+    });
+  });
+
+  res.end(JSON.stringify(fileobjs));
 });
 
 function generateRandomId() {
