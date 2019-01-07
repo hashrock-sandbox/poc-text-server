@@ -70,6 +70,8 @@ app.use("/api/files", function(req, res) {
     if (req.method === "GET") {
       if (isExist) {
         result = readFile(id);
+      } else {
+        result = { key: "", data: "" };
       }
     }
   }

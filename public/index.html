@@ -10,13 +10,14 @@
   <body>
     <div id="app">
       <div class="files">
+        <div><button @click="create">新規作成</button></div>
         <div
           class="files__item"
           v-for="file in files"
           @click="select(file.name)"
           :class="{'selected': file.name === key}"
         >
-          {{ file.name }} {{ file.mtime }}
+          {{ file.name }} {{ file.mtime | hms }}
         </div>
       </div>
       <div class="contents">

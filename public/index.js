@@ -23,6 +23,14 @@ async function get() {
 
 var dmp = new diff_match_patch();
 
+Vue.filter("hms", input => {
+  const d = new Date(input);
+  const hh = ("00" + d.getHours()).slice(-2);
+  const mm = ("00" + d.getMinutes()).slice(-2);
+  const ss = ("00" + d.getSeconds()).slice(-2);
+  return `${hh}:${mm}:${ss}`;
+});
+
 new Vue({
   el: "#app",
   data: {
@@ -51,8 +59,17 @@ new Vue({
     triggerSave: _.debounce(function() {
       this.save();
     }, 1000),
-    async fetch() {},
-
+    async create() {
+      this.key = "new";
+      this.input = "";
+      this.original = "";
+      const res = await save(this.key, this.input);
+      if (res.success) {
+        this.key = res.key;
+        this.select(this.key);
+        this.files = await get();
+      }
+    },
     async save() {
       this.saving = true;
 
@@ -82,6 +99,7 @@ new Vue({
       if (res.success) {
         this.key = res.key;
         this.select(this.key);
+        this.files = await get();
       }
     },
     async select(filename) {
