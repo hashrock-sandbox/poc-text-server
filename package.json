@@ -7,5 +7,8 @@
     "body-parser": "^1.18.3",
     "connect": "^3.6.6",
     "serve-static": "^1.13.2"
+  },
+  "scripts": {
+    "start": "node index.js"
   }
 }
