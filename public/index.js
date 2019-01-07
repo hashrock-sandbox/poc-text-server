@@ -58,7 +58,7 @@ new Vue({
   methods: {
     triggerSave: _.debounce(function() {
       this.save();
-    }, 1000),
+    }, 3000),
     async create() {
       this.key = "new";
       this.input = "";
