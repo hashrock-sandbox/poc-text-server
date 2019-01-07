@@ -21,6 +21,8 @@ async function get() {
   return await res.json();
 }
 
+var dmp = new diff_match_patch();
+
 new Vue({
   el: "#app",
   data: {
@@ -53,6 +55,29 @@ new Vue({
 
     async save() {
       this.saving = true;
+
+      const remoteNew = (await read(this.key)).data;
+      const diff = dmp.diff_main(this.original, remoteNew, true);
+      if (diff.length > 2) {
+        dmp.diff_cleanupSemantic(diff);
+      }
+      const patch_list = dmp.patch_make(this.original, remoteNew, diff);
+      const patch_text = dmp.patch_toText(patch_list);
+      const patches = dmp.patch_fromText(patch_text);
+
+      const result = dmp.patch_apply(patches, this.input);
+      if (result[1]) {
+        this.input = result[0];
+      } else {
+        if (
+          window.confirm("コンフリクトが発生しました。やっちゃっていいですか？")
+        ) {
+          //nothing to do
+        } else {
+          this.input = remoteNew;
+        }
+      }
+
       const res = await save(this.key, this.input);
       if (res.success) {
         this.key = res.key;
