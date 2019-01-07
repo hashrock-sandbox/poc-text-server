@@ -26,19 +26,44 @@ new Vue({
   data: {
     input: "#test",
     key: "",
-    files: []
+    files: [],
+    saving: false,
+    original: ""
+  },
+  watch: {
+    input: function() {
+      if (this.dirty) {
+        this.triggerSave();
+      }
+    }
+  },
+  computed: {
+    status() {
+      return this.saving ? "Saving..." : this.dirty ? "*" : "Saved.";
+    },
+    dirty() {
+      return this.original !== this.input;
+    }
   },
   methods: {
+    triggerSave: _.debounce(function() {
+      this.save();
+    }, 1000),
+    async fetch() {},
+
     async save() {
+      this.saving = true;
       const res = await save(this.key, this.input);
       if (res.success) {
         this.key = res.key;
+        this.select(this.key);
       }
     },
-    load() {},
     async select(filename) {
+      this.saving = false;
       this.key = filename;
       this.input = (await read(filename)).data;
+      this.original = this.input;
     }
   },
   async mounted() {
